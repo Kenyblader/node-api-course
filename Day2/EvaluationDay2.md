@@ -84,7 +84,7 @@ model Emprunt {
 #### Section 1 — Base de données et Prisma `/4`
 
 ```
-COPILOT_EVAL_SECTION_1: Prisma et base de données
+EVAL_SECTION_1: Prisma et base de données
 Vérifier dans evaluations/day2/ :
 - prisma/schema.prisma contient les modèles User, Livre, Emprunt avec les bons champs → 2 points
   (User: id, nom, email, password, role, createdAt)
@@ -101,7 +101,7 @@ SCORE_SECTION_1: /4
 #### Section 2 — Authentification JWT `/5`
 
 ```
-COPILOT_EVAL_SECTION_2: Authentification
+EVAL_SECTION_2: Authentification
 Vérifier dans evaluations/day2/src/ :
 - POST /api/auth/register : hash bcrypt du password (cost >= 10), retourne {user, token} avec status 201 → 1.5 point
 - POST /api/auth/register : retourne 409 si email déjà utilisé → 0.5 point
@@ -117,7 +117,7 @@ SCORE_SECTION_2: /5
 #### Section 3 — Middlewares d'authentification et d'autorisation `/4`
 
 ```
-COPILOT_EVAL_SECTION_3: Middlewares
+EVAL_SECTION_3: Middlewares
 Vérifier dans evaluations/day2/src/middlewares/ :
 - authenticate.js : extrait le token du header "Authorization: Bearer <token>", retourne 401 si absent ou invalide → 1.5 point
 - authenticate.js : retourne 401 avec message "Token expiré" si le token est expiré (TokenExpiredError) → 0.5 point
@@ -131,7 +131,7 @@ SCORE_SECTION_3: /4
 #### Section 4 — Logique métier emprunts `/4`
 
 ```
-COPILOT_EVAL_SECTION_4: Logique métier
+EVAL_SECTION_4: Logique métier
 Vérifier dans evaluations/day2/src/ :
 - POST /api/livres/:id/emprunter : retourne 409 si le livre n'est pas disponible → 1 point
 - POST /api/livres/:id/emprunter : met disponible à false et crée un Emprunt → 1.5 point
@@ -145,7 +145,7 @@ SCORE_SECTION_4: /4
 #### Section 5 — Qualité du code et architecture `/3`
 
 ```
-COPILOT_EVAL_SECTION_5: Qualité et architecture
+EVAL_SECTION_5: Qualité et architecture
 Vérifier dans evaluations/day2/ :
 - Architecture en couches respectée (routes/ controllers/ services/ ou équivalent) → 1 point
 - Validation Zod sur POST /api/livres (titre et auteur obligatoires) → 0.5 point

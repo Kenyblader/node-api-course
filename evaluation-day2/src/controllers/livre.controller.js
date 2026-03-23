@@ -64,7 +64,14 @@ const livreController = {
             const livre = await livreService.emprunterLivre(userId, id);
             res.status(200).json(livre);
         } catch (error) {
-            next(error);
+            if(error.message === "Livre déjà emprunté") {
+                res.status(400).json({ message: error.message });
+            } else if(error.message === "Livre non trouvé") {
+                res.status(409).json({ message: error.message });
+             } 
+            else {
+                next(error);
+            }
         }
     },
 

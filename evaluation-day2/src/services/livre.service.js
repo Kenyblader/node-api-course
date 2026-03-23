@@ -1,5 +1,5 @@
 import livreRepository from "../repositories/livreRepository.js";
-import empruntRepository from "../repositories/empruntRepository.js";
+import prisma from '../db/prisma.js';
 
 class LivreService {
     async getAllLivres(filters = {}) {
@@ -23,37 +23,47 @@ class LivreService {
     }
 
     async emprunterLivre(userId, livreId) {
-       const livre = await livreRepository.findById(livreId);
-       if (!livre) {
-           throw new Error("Livre non trouvé");
-       }
-       if (livre.disponible) {
-           livre.disponible = false;
-           await livreRepository.updateLivre(livreId, livre);
-           await empruntRepository.createEmprunt({ userId, livreId, dateEmprunt: new Date() });
-           return livre;
-       } else {
-           throw new Error("Livre déjà emprunté");
-       }
+        return await prisma.$transaction(async (tx) => {
+            const livre = await tx.livre.findUnique({ where: { id: livreId } });
+            if (!livre) throw new Error("Livre non trouvé");
+            if (!livre.disponible) throw new Error("Livre déjà emprunté");
+
+            // Créer l'emprunt
+            await tx.emprunt.create({
+                data: { userId, livreId }
+            });
+
+            // Mettre à jour la disponibilité du livre
+            await tx.livre.update({
+                where: { id: livreId },
+                data: { disponible: false }
+            });
+
+            return { ...livre, disponible: false };
+        });
     }
 
     async retournerLivre(livreId, userId) {
-        const emprunt = await empruntRepository.findByLivreIdAndUserId(livreId, userId);
-        if (!emprunt) {
-            throw new Error("Emprunt non trouvé pour ce livre et cet utilisateur");
-        }
-        const livre = await livreRepository.findById(livreId);
-        if (!livre) {
-            throw new Error("Livre non trouvé");
-        }
-        if (!livre.disponible) {
-            livre.disponible = true;
-            await livreRepository.updateLivre(livreId, livre);
-            await empruntRepository.updateEmprunt(emprunt.id, { dateRetour: new Date() });
-            return livre;
-        } else {
-            throw new Error("Livre non emprunté");
-        }
+        return await prisma.$transaction(async (tx) => {
+            const emprunt = await tx.emprunt.findFirst({
+                where: { livreId, userId, dateRetour: null }
+            });
+            if (!emprunt) throw new Error("Aucun emprunt actif trouvé");
+
+            // Mettre à jour la date de retour
+            await tx.emprunt.update({
+                where: { id: emprunt.id },
+                data: { dateRetour: new Date() }
+            });
+
+            // Remettre le livre comme disponible
+            await tx.livre.update({
+                where: { id: livreId },
+                data: { disponible: true }
+            });
+
+            return { message: "Livre retourné" };
+        });
     }
 }
 
